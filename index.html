@@ -162,3 +162,172 @@
             border-radius: 50px;
             text-decoration: none;
             font-weight: 700;
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+            z-index: 100;
+            transition: 0.3s;
+        }
+        .whatsapp-btn:hover { transform: scale(1.05); }
+
+        .footer { text-align: center; padding: 40px; color: #aaa; font-size: 12px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <img src="bertan%20branco%20logo.png" alt="Bertan Resinas">
+</div>
+
+<div class="container">
+    <div class="product-selector">
+        <div class="product-card active" onclick="changeResin('bv', this)">
+            <h4 class="txt-bv">Baixa Viscosidade</h4>
+            <small>Espessuras até 0,5cm</small>
+        </div>
+        <div class="product-card" onclick="changeResin('mv', this)">
+            <h4 class="txt-mv">Média Viscosidade</h4>
+            <small>Espessuras até 2,0cm</small>
+        </div>
+        <div class="product-card" onclick="changeResin('av', this)">
+            <h4 class="txt-av">Alta Viscosidade</h4>
+            <small>Espessuras até 5,0cm</small>
+        </div>
+        <div class="product-card" onclick="changeResin('pl', this)">
+            <h4 class="txt-pl">Porcelanato Líquido</h4>
+            <small>Pisos e Mesas</small>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <div class="shape-selector">
+            <button class="shape-btn active" onclick="changeShape('rect', this)">Retangular / Quadrado</button>
+            <button class="shape-btn" onclick="changeShape('circ', this)">Circular / Redondo</button>
+        </div>
+
+        <div class="input-grid" id="inputs-rect">
+            <div class="input-group">
+                <label>Comprimento (cm)</label>
+                <input type="number" id="dim-c" placeholder="0" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>Largura (cm)</label>
+                <input type="number" id="dim-l" placeholder="0" oninput="calculate()">
+            </div>
+        </div>
+
+        <div class="input-grid" id="inputs-circ" style="display: none;">
+            <div class="input-group" style="grid-column: span 2;">
+                <label>Diâmetro do Círculo (cm)</label>
+                <input type="number" id="dim-d" placeholder="0" oninput="calculate()">
+            </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 25px;">
+            <label>Espessura / Altura desejada (cm)</label>
+            <input type="number" id="dim-a" placeholder="0" step="0.1" oninput="calculate()">
+        </div>
+
+        <div class="result-panel">
+            <label>Total de Mistura Necessária</label>
+            <span class="total-weight" id="res-total">0.000 kg</span>
+            
+            <div class="mix-details">
+                <div class="mix-box">
+                    <h5>Resina (A)</h5>
+                    <p id="res-a">0.000 kg</p>
+                </div>
+                <div class="mix-box">
+                    <h5 id="lbl-b">Endurecedor (B)</h5>
+                    <p id="res-b">0.000 kg</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-strip">
+            <div id="info-ratio">Proporção: 45%</div>
+            <div id="info-time">Mistura: 4 min</div>
+            <div id="info-dry">Secagem: 6h</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    © BERTAN RESINAS - Qualidade e Performance<br>
+    Suporte Técnico: (46) 99115-5803
+</div>
+
+<a href="https://wa.me/5546991155803" class="whatsapp-btn" target="_blank">📲 Suporte via WhatsApp</a>
+
+<script>
+    const resins = {
+        bv: { ratio: 0.45, time: '4 min', dry: '6h', thick: 0.5 },
+        mv: { ratio: 0.50, time: '3 min', dry: '8h', thick: 2.0 },
+        av: { ratio: 0.40, time: '3 min', dry: '48h', thick: 5.0 },
+        pl: { ratio: 0.50, time: '3 min', dry: '12h', thick: 1.0 }
+    };
+
+    let currentResin = 'bv';
+    let currentShape = 'rect';
+
+    function changeResin(key, el) {
+        currentResin = key;
+        document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        
+        // Atualiza info strips
+        document.getElementById('info-ratio').innerText = `Proporção: ${resins[key].ratio * 100}%`;
+        document.getElementById('info-time').innerText = `Mistura: ${resins[key].time}`;
+        document.getElementById('info-dry').innerText = `Secagem: ${resins[key].dry}`;
+        document.getElementById('lbl-b').innerText = `Endurecedor (${resins[key].ratio * 100}%)`;
+        
+        calculate();
+    }
+
+    function changeShape(shape, el) {
+        currentShape = shape;
+        document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        
+        document.getElementById('inputs-rect').style.display = shape === 'rect' ? 'grid' : 'none';
+        document.getElementById('inputs-circ').style.display = shape === 'circ' ? 'grid' : 'none';
+        
+        calculate();
+    }
+
+    function calculate() {
+        const h = parseFloat(document.getElementById('dim-a').value) || 0;
+        let area = 0;
+
+        if (currentShape === 'rect') {
+            const c = parseFloat(document.getElementById('dim-c').value) || 0;
+            const l = parseFloat(document.getElementById('dim-l').value) || 0;
+            area = c * l;
+        } else {
+            const d = parseFloat(document.getElementById('dim-d').value) || 0;
+            const r = d / 2;
+            area = Math.PI * Math.pow(r, 2);
+        }
+
+        const volumeCm3 = area * h;
+        const totalWeight = (volumeCm3 * 1.1) / 1000; // Densidade aproximada 1.1
+
+        const resinA = totalWeight / (1 + resins[currentResin].ratio);
+        const hardenerB = totalWeight - resinA;
+
+        document.getElementById('res-total').innerText = totalWeight.toFixed(3) + ' kg';
+        document.getElementById('res-a').innerText = resinA.toFixed(3) + ' kg';
+        document.getElementById('res-b').innerText = hardenerB.toFixed(3) + ' kg';
+
+        // Alerta de segurança de espessura
+        if (h > resins[currentResin].thick && h > 0) {
+            document.getElementById('res-total').style.color = '#d32f2f'; // Vermelho de alerta
+        } else {
+            document.getElementById('res-total').style.color = 'var(--primary-blue)';
+        }
+    }
+
+    // Inicialização
+    changeResin('bv', document.querySelector('.product-card'));
+</script>
+
+</body>
+</html>
